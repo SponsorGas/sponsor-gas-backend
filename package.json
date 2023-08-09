@@ -1,0 +1,36 @@
+{
+  "name": "sponsor-gas-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "build": "npx tsc && cp -R public dist",
+    "prebuild": "rm -rf dist",
+    "start": "node dist/index.js",
+    "dev": "concurrently \"npx tsc --watch && cp -R public dist \" \"nodemon -q dist/index.js\""
+  },
+  "author": "Karandeep Singh",
+  "license": "ISC",
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.9",
+    "ethereumjs-util": "^7.1.0",
+    "ethers": "^5.7.0",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.1",
+    "web3.storage": "^4.5.5"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.21",
+    "@types/express": "^4.17.17",
+    "@types/node": "^20.4.2",
+    "chai": "^4.3.4",
+    "concurrently": "^8.2.0",
+    "copyfiles": "^2.4.1",
+    "nodemon": "^3.0.1",
+    "prisma": "^5.1.0",
+    "typescript": "^5.1.6"
+  }
+}
