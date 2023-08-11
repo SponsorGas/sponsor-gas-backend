@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Video Challenge</title>
+  <style>
+    /* Add your custom CSS styles here */
+    #videoPlayer {
+      width: 400px;
+      
+    }
+  </style>
+</head>
+<body>
+  <h1>Video Challenge</h1>
+  <video id="videoPlayer" controls controlslist="nofullscreen nodownload noremoteplayback noplaybackrate">
+    <source src="/videos/quicknode.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <button onclick="submitChallenge()">Submit Challenge</button>
+
+  <script>
+    const videoPlayer = document.getElementById('videoPlayer');
+
+    // var video = document.getElementById('video');
+    var supposedCurrentTime = 0;
+    videoPlayer.addEventListener('timeupdate', function() {
+      if (!videoPlayer.seeking) {
+            supposedCurrentTime = videoPlayer.currentTime;
+      }
+    });
+    // prevent user from seeking
+    videoPlayer.addEventListener('seeking', function() {
+      // guard agains infinite recursion:
+      // user seeks, seeking is fired, currentTime is modified, seeking is fired, current time is modified, ....
+      var delta = videoPlayer.currentTime - supposedCurrentTime;
+      if (Math.abs(delta) > 0.01) {
+        console.log("Seeking is disabled");
+        videoPlayer.currentTime = supposedCurrentTime;
+      }
+    });
+    // delete the following event handler if rewind is not required
+    videoPlayer.addEventListener('ended', function() {
+      // reset state in order to allow for rewind
+        supposedCurrentTime = 0;
+    });
+    function submitChallenge() {
+      // Perform any necessary logic for challenge submission
+      // ...
+      // Send the response back to the UI using window.postMessage()
+      window.opener.postMessage({ response: 'Video Challenge Completed!' }, '*');
+      window.close();
+    }
+  </script>
+</body>
+</html>
