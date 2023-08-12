@@ -19,20 +19,21 @@ model Chain {
 }
 
 model Paymaster {
-  id                String              @id @default(cuid())
-  name              String
-  description       String
-  image             String
-  type              String
-  published         Boolean             @default(false)
-  applications      Application[]
-  createdAt         DateTime            @default(now())
-  PaymasterCriteria PaymasterCriteria[]
-  owner             User?               @relation(fields: [ownerId], references: [id])
-  ownerId           String?
-  chain             Chain               @relation(fields: [chainId], references: [chainId])
-  chainId           String
-  paymasterAddress  String              @default("NotSet")
+  id                       String              @id @default(cuid())
+  name                     String
+  description              String
+  image                    String
+  type                     String
+  published                Boolean             @default(false)
+  applications             Application[]
+  createdAt                DateTime            @default(now())
+  PaymasterCriteria        PaymasterCriteria[]
+  owner                    User?               @relation(fields: [ownerId], references: [id])
+  ownerId                  String?
+  chain                    Chain               @relation(fields: [chainId], references: [chainId])
+  chainId                  String
+  paymasterAddress         String              @default("NotSet")
+  paymasterOffchainService String              @default("http://localhost:8001/api/paymasters/{paymasterAddress}")
 }
 
 model PaymasterCriteria {

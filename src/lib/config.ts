@@ -1,3 +1,6 @@
+const dotenv = require('dotenv');
+dotenv.config();
+
 interface ApplicationConfig{
   applicationContractAddress:string
   name:string
@@ -31,24 +34,24 @@ export const config: Config = {
         name:'ETHGlobal Staking'
       }],
     symbol: 'BaseETH',
-    pimlicoChainValue:'',
+    pimlicoChainValue:'base-goerli',
     blockExplorer: 'https://goerli.basescan.org',
     rpcUrl: 'https://goerli.base.org',
   },
   '0x1a4': {
     name: 'Goerli Optimism',
     entryPointContractAddress:'0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
-    verifyingPaymasterContractAddress: '0xE9866C87082Bac6a08a1F7CbBc2697d137fC5dfc',
-    paymasterRegistryContractAddress:'0x44d65c8be690325059DBe4Fe11c96440d1400EFc',
+    verifyingPaymasterContractAddress: '0xe9866c87082bac6a08a1f7cbbc2697d137fc5dfc',
+    paymasterRegistryContractAddress:'0x44d65c8be690325059dbe4fe11c96440d1400efc',
     applications:[
       {
-        applicationContractAddress:'0xe6E61B4CB54Ecfc67421b61BCdC5a566d91888Ae',
+        applicationContractAddress:'0xe6e61b4cb54ecfc67421b61bcdc5a566d91888ae',
         name:'ETHGlobal Staking'
       }],
     symbol: 'OptimismETH',
-    pimlicoChainValue:'',
+    pimlicoChainValue:'optimism-goerli',
     blockExplorer: 'https://goerli-optimism.etherscan.io',
-    rpcUrl: process.env.OPRIMISM_GOERLI_RPC!,
+    rpcUrl: process.env.OPTIMISM_GOERLI_RPC!,
   }
 }
 
@@ -81,6 +84,14 @@ export const getPaymasterRegistryContractAddressByChainId = (chainId: string): s
   const chainConfig = config[chainId];
   if (chainConfig && isSupportedNetwork(chainId)) {
     return chainConfig.paymasterRegistryContractAddress
+  } else {
+    return ''; // Chain ID not found in config
+  }
+}
+export const getPimlicoChainNameByChainId = (chainId: string): string | undefined => {
+  const chainConfig = config[chainId];
+  if (chainConfig && isSupportedNetwork(chainId)) {
+    return chainConfig.pimlicoChainValue
   } else {
     return ''; // Chain ID not found in config
   }

@@ -7,24 +7,23 @@ const secretKey = 'your_secret_key';
 
 const authorizedTokens = new Set();
 export function generateAndAttachChallengeToken(req: Request, res: Response, next: () => void) {
-    // const userOperation = req.body.userOperation;
-    // const userIdentifier = generateUserIdentifier(userOperation);
-    // const userIdentifier = req.params.id
+    
 
-    const {scope,redirect_url} = req.query
-    console.log(`scope : ${scope}`)
-    console.log(`redirect_url : ${redirect_url}`)
-    if(!scope || !redirect_url){
+    const {paymasterId,scope,redirect_url} = req.query
+    // console.log(`paymasterId : ${paymasterId}`)
+    // console.log(`scope : ${scope}`)
+    // console.log(`redirect_url : ${redirect_url}`)
+    if(!scope || !redirect_url || !paymasterId){
         return res.status(400).json(
             {
-                error:"Invalid Request: Include scope and redirect_url."
+                error:"Invalid Request: Include paymasterId, scope and redirect_url."
             }
         );
     }
 
      // Create a JWT with the userIdentifier as payload
        
-     const token = jwt.sign({ scope,redirect_url }, secretKey, { expiresIn: '15m' });
+     const token = jwt.sign({paymasterId, scope,redirect_url }, secretKey, { expiresIn: '15m' });
 
      // Set the JWT as a cookie
      res.cookie('ChallengeRequestToken', token, { httpOnly: true });

@@ -262,6 +262,7 @@ export class PaymasterApplicationsRegistry {
                     'ownerId':`${emittingAccount}`,
                     'chainId':`${(await provider.getNetwork()).chainId}`,
                     "paymasterAddress":paymasterRegistered.args[0],
+                    "paymasterOffchainService":`http://localhost:8001/api/paymasters/${paymasterRegistered.args[0]}`
                   // "pyamasterMetadata":paymasterRegistered.args[1]
                   // "applications": await this.getSupportedApplications(paymasterRegistered.args[0])
               }
@@ -292,7 +293,7 @@ export class PaymasterApplicationsRegistry {
     try{
         const filter = this._paymasterApplicationsRegistry.filters.ApplicationAdded(null,applicationAddress); // paymasterAddress,appAddress
         const applicationAddedEvents = await this._paymasterApplicationsRegistry.queryFilter(filter);
-        console.log(applicationAddedEvents)
+        // console.log(applicationAddedEvents)
         const provider = this._paymasterApplicationsRegistry.provider
         // if(applicationAddedEvents.length === 0) return []
           const paymasters : Paymaster[] = await Promise.all(
@@ -311,6 +312,7 @@ export class PaymasterApplicationsRegistry {
                     'ownerId':`${emittingAccount}`,
                     'chainId':`0x${((await provider.getNetwork()).chainId).toString(16)}`,
                     "paymasterAddress":applicationAdded.args[0],
+                    "paymasterOffchainService":`http://localhost:8001/api/paymasters/${applicationAdded.args[0]}`
                   // "pyamasterMetadata":paymasterRegistered.args[1]
               }
           }))

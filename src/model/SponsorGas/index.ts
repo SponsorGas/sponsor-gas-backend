@@ -22,6 +22,7 @@ export interface Chain {
     chain?: Chain;
     chainId: string;
     paymasterAddress:string;
+    paymasterOffchainService:string;
   }
   
   export interface PaymasterCriteria {

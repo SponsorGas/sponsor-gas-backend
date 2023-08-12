@@ -13,7 +13,7 @@ import {
 } from './typechain-types'
 import { UserOperation } from './UserOperation'
 import { Create2Factory } from './helpers/Create2Factory'
-import { config } from '../lib/config'
+import { config, getVerifyingPaymasterContractAddressByChainId, isSupportedNetwork } from '../lib/config'
 
 export function packUserOp (op: UserOperation, forSignature = true): string {
   if (forSignature) {
@@ -212,11 +212,16 @@ export async function fillAndSign (op: Partial<UserOperation>, signer: Wallet | 
 }
 
 export async function getSignedUserOpWithPaymasterData(userOperation:Partial<UserOperation>,chainId:string, entryPointAddress:string, getNonceFunction = 'getNonce'): Promise<UserOperation| null>{
-  if(chainId !== '0xe704'){
-    return null;
+  
+  if(!isSupportedNetwork(chainId)){
+    throw new Error(`${chainId} not supported`)
   }
-  const paymasterSigner = new ethers.Wallet(process.env.LINEA_PAYMASTER_SIGNER_KEY!)
-  const provider = new ethers.providers.JsonRpcProvider(config['0xe704'].rpcUrl)
+  const verifyingPaymasterContractAddress = getVerifyingPaymasterContractAddressByChainId(chainId)
+  const paymasterSigner = chainId === '0xe704'
+                            ? new ethers.Wallet(process.env.LINEA_PAYMASTER_SIGNER_KEY!)
+                            : new ethers.Wallet(process.env.PAYMASTERSIGNER_PRIVATE_KEY!)
+
+  const provider = new ethers.providers.JsonRpcProvider(config[chainId].rpcUrl)
   const entryPoint = EntryPoint__factory.connect(entryPointAddress,provider)
   const op2 = await fillUserOp(userOperation, entryPoint, getNonceFunction)
   console.log("After FillUserOp")
@@ -224,9 +229,9 @@ export async function getSignedUserOpWithPaymasterData(userOperation:Partial<Use
 
   // console.log(Math.round(Date.now()/1000+100000))
   const MOCK_VALID_AFTER = 0
-  // const MOCK_VALID_UNTIL = ethers.utils.hexlify(Math.round(Date.now()/1000+100000))
-  const MOCK_VALID_UNTIL = 1691804634
-  const paymaster = VerifyingPaymaster__factory.connect(process.env.LINEA_PAYMASTER_CONTRACT!,provider)
+  const MOCK_VALID_UNTIL = ethers.utils.hexlify(Math.round(Date.now()/1000+100000))
+  // const MOCK_VALID_UNTIL = 1691804634
+  const paymaster = VerifyingPaymaster__factory.connect(verifyingPaymasterContractAddress!,provider)
   op2.paymasterAndData = hexConcat([paymaster.address, defaultAbiCoder.encode(['uint48', 'uint48'], [MOCK_VALID_UNTIL, MOCK_VALID_AFTER]), '0x' + '00'.repeat(65)])
   const hash = await paymaster.getHash(op2, MOCK_VALID_UNTIL, MOCK_VALID_AFTER)
   

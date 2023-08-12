@@ -1,28 +1,89 @@
 import express, { Request, Response } from "express"
-import { config as dotenvConfig } from "dotenv"
-import { resolve } from "path"
+
 import { getSignedUserOpWithPaymasterData } from "../utils/UserOp";
+import { getPaymasterCriteriaById, getPaymasterCriteriaForPaymasterId } from "../services";
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
-const secretKey = 'your_secret_key';
-
-dotenvConfig({ path: resolve(__dirname, "./../../../../../.env") })
+const secretKey = process.env.JWT_SECRET;
+  
 
 const authorizedTokens = new Set();
+const getRandomValue = (arr: { type: string; value: any; }[]) => arr[Math.floor(Math.random() * arr.length)];
 
-const paymasterWithScope = (_req: express.Request, _res: express.Response) => {
-    try {
-        const {scope,redirectUrl} = _req.query
-				const {paymaster_address} = _req.params
-          //res.json({ challenge, token: res.locals.token });
-          _res.redirect(`/api/paymasters/${paymaster_address}/challenge`);
-        // _res.setHeader("Content-Type", "application/json")
-        // _res.status(200).end(JSON.stringify({ app_name: "SPONSOR GAS BACKEND" }))
-    } catch (error: any) {
-        console.error(error)
-        _res.status(500).end()
+const paymasterWithScope = async (_req: express.Request, _res: express.Response) => {
+  try {
+      const { paymasterId, scope, redirectUrl } = _req.query;
+      const { paymaster_address } = _req.params;
+
+      const paymasterIdString: string = paymasterId?.toString() || '';
+
+      const paymasterCriteria = await getPaymasterCriteriaForPaymasterId(paymasterIdString);
+      const randomCriteria = getRandomValue(paymasterCriteria);
+
+      let redirectPath = '';
+
+      if (randomCriteria.type === 'video_challenge') {
+          redirectPath = '/api/paymasters/' + paymaster_address + '/challenges/video';
+      } else if (randomCriteria.type === 'question_challenge') {
+          redirectPath = '/api/paymasters/' + paymaster_address + '/challenges/question';
+      } else if (randomCriteria.type === 'identity') {
+          redirectPath = '/api/paymasters/' + paymaster_address + '/challenges/identity';
+      } else if (randomCriteria.type === 'nft') {
+          redirectPath = '/api/paymasters/' + paymaster_address + '/challenges/nft';
+      } else {
+          _res.status(404).end();
+          return;
+      }
+
+      // Append the criteria value as a query parameter in the redirect URL
+      redirectPath += '?criteria=' + encodeURIComponent(randomCriteria.value);
+
+      _res.redirect(redirectPath);
+  } catch (error: any) {
+      console.error(error);
+      _res.status(500).end();
+  }
+}
+
+const videoChallenge = (_req: express.Request, _res: express.Response) => {
+  try {
+      const { criteria } = _req.query;
+      // criteria is a CID , to fetch video file
+      // Render the video challenge template and send it to the UI
+      _res.render('video-challenge');
+  } catch (error: any) {
+      console.error(error)
+      _res.status(500).end()
+  }
+}
+
+const questionChallenge = async (_req: express.Request, _res: express.Response) => {
+  try {
+      const { criteria } = _req.query;
+      if (!criteria) {
+        throw new Error('Criteria not provided');
     }
+      // criteria is a paymasterCriteriaId
+      const paymasterCriteria = await getPaymasterCriteriaById(criteria as string);
+
+      if (paymasterCriteria.type !== 'question_challenge'|| !paymasterCriteria.questionBook) {
+          _res.status(400).end('Invalid or missing question challenge criteria');
+          return;
+      }
+      const questionBook = JSON.parse(paymasterCriteria.questionBook as string)
+      // Assuming paymasterCriteria.questionBook contains the JSON for question challenge
+      const challenge = {
+          type: 'question',
+          question: questionBook.question,
+          options: questionBook.options,
+      };
+
+      _res.render('question-challenge', { challenge });
+  } catch (error: any) {
+      console.error(error);
+      _res.status(500).end();
+  }
 }
 
 const paymasterChallenge = (_req: express.Request, _res: express.Response) => {
@@ -114,5 +175,7 @@ export = {
 		paymasterWithScope,
 		submitPaymasterChallenge,
 		getAccessToken,
-		getPaymasterAndData
+		getPaymasterAndData,
+    videoChallenge,
+    questionChallenge
 }  

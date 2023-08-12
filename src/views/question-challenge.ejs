@@ -27,9 +27,14 @@
       var selectedAnswer = document.querySelector('input[name="answer"]:checked');
       var answer = selectedAnswer ? selectedAnswer.value : '';
 
+      const url = new URL(window.location.href);
+      url.search = '';
+
+      // Construct the challenge submission URL
+      const submissionUrl = `${url.toString()}/submit`;
       // Call the API to submit the challenge response
       try {
-        const response = await fetch(`${window.location.href}/submit`, {
+        const response = await fetch(`${submissionUrl}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -1,9 +1,7 @@
 import express from "express"
-import { config as dotenvConfig } from "dotenv"
-import { resolve } from "path"
 import { getPaymastersOnChainForApplication } from "../services"
 
-dotenvConfig({ path: resolve(__dirname, "./../../../../../.env") })
+
 
 const applicationName = (_req: express.Request, _res: express.Response) => {
     try {
