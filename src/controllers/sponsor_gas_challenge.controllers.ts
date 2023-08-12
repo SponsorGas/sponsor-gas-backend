@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express"
-
 import { getSignedUserOpWithPaymasterData } from "../utils/UserOp";
 import { getPaymasterCriteriaById, getPaymasterCriteriaForPaymasterId } from "../services";
+import { Web3Storage } from "web3.storage";
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
@@ -45,13 +45,50 @@ const paymasterWithScope = async (_req: express.Request, _res: express.Response)
       _res.status(500).end();
   }
 }
+async function streamToUint8Array(stream: ReadableStream<Uint8Array>) {
+  const chunks = [];
+  const reader = stream.getReader();
 
-const videoChallenge = (_req: express.Request, _res: express.Response) => {
+  while (true) {
+    const { done, value } = await reader.read();
+
+    if (done) {
+      break;
+    }
+
+    chunks.push(value);
+  }
+
+  const totalLength = chunks.reduce((length, chunk) => length + chunk.length, 0);
+  const result = new Uint8Array(totalLength);
+  let offset = 0;
+
+  chunks.forEach(chunk => {
+    result.set(chunk, offset);
+    offset += chunk.length;
+  });
+
+  return result;
+}
+
+const videoChallenge = async (_req: express.Request, _res: express.Response) => {
   try {
       const { criteria } = _req.query;
+      if (!criteria) {
+        throw new Error('Criteria not provided');
+      }
       // criteria is a CID , to fetch video file
+      const client = new Web3Storage({ token: process.env.WEB3_STORAGE_API_KEY! })
+      const videoFileResponse = await client.get(criteria as string)
+      if(videoFileResponse){
+        const files = await videoFileResponse.files();
+        console.log(files)
+        const videoFile = await files[0];
+        const videoURL = `https://${videoFile.cid}.ipfs.w3s.link`
+        _res.render('video-challenge', { videoURL });
+      }
       // Render the video challenge template and send it to the UI
-      _res.render('video-challenge');
+      // _res.render('video-challenge');
   } catch (error: any) {
       console.error(error)
       _res.status(500).end()
@@ -63,7 +100,7 @@ const questionChallenge = async (_req: express.Request, _res: express.Response) 
       const { criteria } = _req.query;
       if (!criteria) {
         throw new Error('Criteria not provided');
-    }
+      }
       // criteria is a paymasterCriteriaId
       const paymasterCriteria = await getPaymasterCriteriaById(criteria as string);
 
@@ -106,8 +143,8 @@ const paymasterChallenge = (_req: express.Request, _res: express.Response) => {
   const submitPaymasterChallenge = (req: Request, res: Response) => {
     // Extract the challenge response from the request body (assuming it's sent as JSON)
     
-    const {answer} = req.body
-    console.log(answer)
+    // const {answer} = req.body
+    // console.log(answer)
     // const { scope,redirect_url } = req;
   
     const authorizationCode = generateAuthorizationCode();
