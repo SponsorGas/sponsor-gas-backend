@@ -2,6 +2,7 @@ import express, { Request, Response } from "express"
 import { getSignedUserOpWithPaymasterData } from "../utils/UserOp";
 import { getPaymasterCriteriaById, getPaymasterCriteriaForPaymasterId } from "../services";
 import { Web3Storage } from "web3.storage";
+import axios from 'axios'
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
@@ -202,39 +203,40 @@ const getAccessToken = (req: Request, res: Response) => {
   type VerifyReply = {
     code: string;
     detail?: string;
+    AuthCode?:string
   };
   
   function verifyWorldcoinIdentity(req:express.Request, res: express.Response<VerifyReply>) {
     try{
       const reqBody = {
-        merkle_root: req.body.merkle_root,
-        nullifier_hash: req.body.nullifier_hash,
-        proof: req.body.proof,
-        credential_type: req.body.credential_type,
+        merkle_root: req.body.data.merkle_root,
+        nullifier_hash: req.body.data.nullifier_hash,
+        proof: req.body.data.proof,
+        credential_type: req.body.data.credential_type,
         action: 'identityproof', // or get this from environment variables,
         signal: req.body.signal ?? "", // if we don't have a signal, use the empty string
-      };
-      fetch(`https://developer.worldcoin.org/api/v1/verify/${process.env.WLD_APP_ID}`, {
-        method: "POST",
+      }; 
+      
+      axios.post(`https://developer.worldcoin.org/api/v1/verify/${process.env.WLD_APP_ID}`, reqBody, {
         headers: {
           "Content-Type": "application/json",
-        },
-        body: JSON.stringify(reqBody), 
-      }).then((verifyRes) => {
-        verifyRes.json().then((wldResponse) => {
+        }
+      }).then((verifyRes:any) => {
+        console.log(verifyRes)
           if (verifyRes.status == 200) {
             // this is where you should perform backend actions based on the verified credential
             // i.e. setting a user as "verified" in a database
-            res.status(verifyRes.status).send({ code: "success" });
+            const authorizationCode = generateAuthorizationCode();
+		        authorizedTokens.add(authorizationCode); 
+            res.status(verifyRes.status).send({ code: "success" ,AuthCode:authorizationCode});
           } else {
             // return the error code and detail from the World ID /verify endpoint to our frontend
             res.status(verifyRes.status).send({ 
-              code: wldResponse.code, 
-              detail: wldResponse.detail 
+              code: verifyRes.data.code,
+              detail: verifyRes.data.detail,
             });
           }
         });
-      });
     }catch(e){
       res.status(500)
       console.log(e)

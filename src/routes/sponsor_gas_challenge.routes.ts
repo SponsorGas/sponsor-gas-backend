@@ -23,5 +23,5 @@ sponsorGasChallengeRouter.post("/paymasters/:paymaster_address/challenges/identi
 
 sponsorGasChallengeRouter.post('/paymasters/:paymaster_address/challenge/submit', verifyChallengeToken, sponsorGasChallengeController.submitPaymasterChallenge)
 sponsorGasChallengeRouter.post('/paymasters/:paymaster_address/access_token', sponsorGasChallengeController.getAccessToken)
-sponsorGasChallengeRouter.post('/paymasters/0x1234/paymasterAndData', verifyAccessToken, sponsorGasChallengeController.getPaymasterAndData )
+sponsorGasChallengeRouter.post('/paymasters/:paymaster_address/paymasterAndData', verifyAccessToken, sponsorGasChallengeController.getPaymasterAndData )
   
