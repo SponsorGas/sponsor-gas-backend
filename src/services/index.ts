@@ -18,10 +18,10 @@ export const getPaymastersOnChainForApplication = async (chainId:string,applicat
             },
         },
     });
-    const provider = new ethers.providers.JsonRpcProvider(getChainConfigForChainId(chainId)?.rpcUrl)
-    const paymasterApplicationsRegistry:PaymasterApplicationsRegistry = new PaymasterApplicationsRegistry(provider,chainId)
-    const paymastersFromContracts = await paymasterApplicationsRegistry.getSupportedPaymasterForApplication(applicationAddress)
-    return paymastersOnChainForApplication.concat(paymastersFromContracts)
+    // const provider = new ethers.providers.JsonRpcProvider(getChainConfigForChainId(chainId)?.rpcUrl)
+    // const paymasterApplicationsRegistry:PaymasterApplicationsRegistry = new PaymasterApplicationsRegistry(provider,chainId)
+    // const paymastersFromContracts = await paymasterApplicationsRegistry.getSupportedPaymasterForApplication(applicationAddress)
+    return paymastersOnChainForApplication // .concat(paymastersFromContracts)
 }
 export const getPaymaster = async (chainId:string,paymasterAddress:string,paymasterId:string) =>{
     const paymaster: Paymaster | null = await prisma.paymaster.findFirst({

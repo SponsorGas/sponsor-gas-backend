@@ -27,7 +27,7 @@ const paymasterWithScope = async (_req: express.Request, _res: express.Response)
           redirectPath = '/api/paymasters/' + paymaster_address + '/challenges/video';
       } else if (randomCriteria.type === 'question_challenge') {
           redirectPath = '/api/paymasters/' + paymaster_address + '/challenges/question';
-      } else if (randomCriteria.type === 'identity') {
+      } else if (randomCriteria.type === 'identity_challenge') {
           redirectPath = '/api/paymasters/' + paymaster_address + '/challenges/identity';
       } else if (randomCriteria.type === 'nft') {
           redirectPath = '/api/paymasters/' + paymaster_address + '/challenges/nft';
@@ -44,31 +44,6 @@ const paymasterWithScope = async (_req: express.Request, _res: express.Response)
       console.error(error);
       _res.status(500).end();
   }
-}
-async function streamToUint8Array(stream: ReadableStream<Uint8Array>) {
-  const chunks = [];
-  const reader = stream.getReader();
-
-  while (true) {
-    const { done, value } = await reader.read();
-
-    if (done) {
-      break;
-    }
-
-    chunks.push(value);
-  }
-
-  const totalLength = chunks.reduce((length, chunk) => length + chunk.length, 0);
-  const result = new Uint8Array(totalLength);
-  let offset = 0;
-
-  chunks.forEach(chunk => {
-    result.set(chunk, offset);
-    offset += chunk.length;
-  });
-
-  return result;
 }
 
 const videoChallenge = async (_req: express.Request, _res: express.Response) => {
@@ -120,6 +95,23 @@ const questionChallenge = async (_req: express.Request, _res: express.Response) 
   } catch (error: any) {
       console.error(error);
       _res.status(500).end();
+  }
+}
+
+const identityChallenge = async (_req: express.Request, _res: express.Response) => {
+  try {
+      const { criteria } = _req.query;
+      if (!criteria) {
+        throw new Error('Criteria not provided');
+      }
+      // criteria is a identity type
+      if(criteria === 'worldcoin'){
+        _res.render('worldcoin-challenge');
+      }
+      
+  } catch (error: any) {
+      console.error(error)
+      _res.status(500).end()
   }
 }
 
@@ -207,6 +199,50 @@ const getAccessToken = (req: Request, res: Response) => {
   };
 
 
+  type VerifyReply = {
+    code: string;
+    detail?: string;
+  };
+  
+  function verifyWorldcoinIdentity(req:express.Request, res: express.Response<VerifyReply>) {
+    try{
+      const reqBody = {
+        merkle_root: req.body.merkle_root,
+        nullifier_hash: req.body.nullifier_hash,
+        proof: req.body.proof,
+        credential_type: req.body.credential_type,
+        action: 'identityproof', // or get this from environment variables,
+        signal: req.body.signal ?? "", // if we don't have a signal, use the empty string
+      };
+      fetch(`https://developer.worldcoin.org/api/v1/verify/${process.env.WLD_APP_ID}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(reqBody), 
+      }).then((verifyRes) => {
+        verifyRes.json().then((wldResponse) => {
+          if (verifyRes.status == 200) {
+            // this is where you should perform backend actions based on the verified credential
+            // i.e. setting a user as "verified" in a database
+            res.status(verifyRes.status).send({ code: "success" });
+          } else {
+            // return the error code and detail from the World ID /verify endpoint to our frontend
+            res.status(verifyRes.status).send({ 
+              code: wldResponse.code, 
+              detail: wldResponse.detail 
+            });
+          }
+        });
+      });
+    }catch(e){
+      res.status(500)
+      console.log(e)
+    }
+    
+  }
+  
+
 export = {
     paymasterChallenge,
 		paymasterWithScope,
@@ -214,5 +250,7 @@ export = {
 		getAccessToken,
 		getPaymasterAndData,
     videoChallenge,
-    questionChallenge
+    questionChallenge,
+    identityChallenge,
+    verifyWorldcoinIdentity
 }  
