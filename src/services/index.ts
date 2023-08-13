@@ -16,7 +16,11 @@ export const getPaymastersOnChainForApplication = async (chainId:string,applicat
                     ],
                 },
             },
+        
         },
+        include: {
+            PaymasterCriteria:true
+          },
     });
     // const provider = new ethers.providers.JsonRpcProvider(getChainConfigForChainId(chainId)?.rpcUrl)
     // const paymasterApplicationsRegistry:PaymasterApplicationsRegistry = new PaymasterApplicationsRegistry(provider,chainId)
@@ -40,6 +44,7 @@ export const getPaymasterForId = async (paymasterId:string) =>{
         where: {
           id: paymasterId
         },
+        include:{PaymasterCriteria:true}
       });
    
     return paymaster
@@ -85,6 +90,21 @@ export const getPaymasterCriteriaById = async (criteriaId: string) => {
         throw new Error('Error fetching paymaster criteria');
     }
 }
+
+export const doesUserHoldNFT = async (userAddress:string, nftContractAddress:string, chainId:string) => {
+    const rpcURL = getChainConfigForChainId(chainId)?.rpcUrl
+    const provider = new ethers.providers.JsonRpcProvider(rpcURL);
+    const nftContract = new ethers.Contract(nftContractAddress, ['function balanceOf(address owner) view returns (uint256)'], provider);
+  
+    try {
+      const balance:ethers.BigNumber = await nftContract.balanceOf(userAddress);
+      return balance.gt(0); // If balance is greater than 0, the user holds the NFT
+    } catch (error) {
+      console.error('Error:', error);
+      return false;
+    }
+  }
+
 
 
 

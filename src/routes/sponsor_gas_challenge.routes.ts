@@ -20,6 +20,8 @@ sponsorGasChallengeRouter.post("/paymasters/:paymaster_address/challenges/video/
 sponsorGasChallengeRouter.get("/paymasters/:paymaster_address/challenges/identity",verifyChallengeToken, sponsorGasChallengeController.identityChallenge)
 sponsorGasChallengeRouter.post("/paymasters/:paymaster_address/challenges/identity/worldcoin/submit",verifyChallengeToken, sponsorGasChallengeController.verifyWorldcoinIdentity)
 
+sponsorGasChallengeRouter.post("/chains/:chainId/paymasters/:paymaster_address/challenges/nft/submit",generateAndAttachChallengeToken, sponsorGasChallengeController.verifyNFTOwnership)
+
 
 sponsorGasChallengeRouter.post('/paymasters/:paymaster_address/challenge/submit', verifyChallengeToken, sponsorGasChallengeController.submitPaymasterChallenge)
 sponsorGasChallengeRouter.post('/paymasters/:paymaster_address/access_token', sponsorGasChallengeController.getAccessToken)

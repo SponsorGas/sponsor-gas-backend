@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express"
 import { getSignedUserOpWithPaymasterData } from "../utils/UserOp";
-import { getPaymasterCriteriaById, getPaymasterCriteriaForPaymasterId } from "../services";
+import { doesUserHoldNFT, getPaymasterCriteriaById, getPaymasterCriteriaForPaymasterId, getPaymasterForId } from "../services";
 import { Web3Storage } from "web3.storage";
 import axios from 'axios'
 const crypto = require('crypto');
@@ -30,7 +30,7 @@ const paymasterWithScope = async (_req: express.Request, _res: express.Response)
           redirectPath = '/api/paymasters/' + paymaster_address + '/challenges/question';
       } else if (randomCriteria.type === 'identity_challenge') {
           redirectPath = '/api/paymasters/' + paymaster_address + '/challenges/identity';
-      } else if (randomCriteria.type === 'nft') {
+      } else if (randomCriteria.type === 'nft_challenge') {
           redirectPath = '/api/paymasters/' + paymaster_address + '/challenges/nft';
       } else {
           _res.status(404).end();
@@ -206,6 +206,29 @@ const getAccessToken = (req: Request, res: Response) => {
     AuthCode?:string
   };
   
+  async function verifyNFTOwnership(req:express.Request, res: express.Response){
+    const {paymasterId,scope,redirect_url} = req.query
+    const {chainId,paymaster_address} = req.params
+    console.log(req.body.userOperation.sender)
+    const paymaster = await getPaymasterForId(paymasterId as string)
+    if(paymaster){
+      const paymasterCriteria = paymaster.PaymasterCriteria?.find(pc => pc.type === 'nft_challenge' ) 
+      if (paymasterCriteria){
+        const contractAddress = paymasterCriteria.nftCollection
+        const result = await doesUserHoldNFT(req.body.userOperation.sender,contractAddress!,chainId)
+        console.log(result)
+        if(result){
+          const authorizationCode = generateAuthorizationCode();
+          authorizedTokens.add(authorizationCode); 
+          return res.status(200).send({ status: "success" ,AuthCode:authorizationCode});
+        }
+      }
+    }
+    res.status(403).send({ status: "User Don't hold NFT"});
+    
+    
+  }
+
   function verifyWorldcoinIdentity(req:express.Request, res: express.Response<VerifyReply>) {
     try{
       const reqBody = {
@@ -254,5 +277,6 @@ export = {
     videoChallenge,
     questionChallenge,
     identityChallenge,
-    verifyWorldcoinIdentity
+    verifyWorldcoinIdentity,
+    verifyNFTOwnership
 }  
