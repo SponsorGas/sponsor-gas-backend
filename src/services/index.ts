@@ -3,6 +3,7 @@ import prisma from "../lib/prisma";
 import {  Paymaster, PaymasterCriteria } from "../model/SponsorGas";
 import { ethers } from "ethers";
 import { getChainConfigForChainId } from "../lib/config";
+import { Web3Storage } from "web3.storage";
 
 
 export const getPaymastersOnChainForApplication = async (chainId:string,applicationAddress:string) =>{
@@ -22,10 +23,34 @@ export const getPaymastersOnChainForApplication = async (chainId:string,applicat
             PaymasterCriteria:true
           },
     });
+
+    let paymasters : Paymaster[] = paymastersOnChainForApplication
+            const client = new Web3Storage({ token: process.env.WEB3_STORAGE_API_KEY! })
+            paymasters = await Promise.all(paymasters.map(async p => {
+                if(p.image){
+                    try{
+                        const imageFileResponse = await client.get(p.image as string)
+                        if(imageFileResponse){
+                            const files = await imageFileResponse.files();
+                            const imageFile = await files[0];
+                            const imageURL = `https://${imageFile.cid}.ipfs.w3s.link`
+                            p.image = imageURL
+                        }
+                    }
+                    catch(e){
+                        console.log('catught error')
+                        console.error(e)
+                        p.image = undefined
+                    }
+                    
+                }
+                return p
+            }))
+    return paymasters
     // const provider = new ethers.providers.JsonRpcProvider(getChainConfigForChainId(chainId)?.rpcUrl)
     // const paymasterApplicationsRegistry:PaymasterApplicationsRegistry = new PaymasterApplicationsRegistry(provider,chainId)
     // const paymastersFromContracts = await paymasterApplicationsRegistry.getSupportedPaymasterForApplication(applicationAddress)
-    return paymastersOnChainForApplication // .concat(paymastersFromContracts)
+    // return paymastersOnChainForApplication // .concat(paymastersFromContracts)
 }
 export const getPaymaster = async (chainId:string,paymasterAddress:string,paymasterId:string) =>{
     const paymaster: Paymaster | null = await prisma.paymaster.findFirst({
@@ -46,7 +71,24 @@ export const getPaymasterForId = async (paymasterId:string) =>{
         },
         include:{PaymasterCriteria:true}
       });
-   
+      const client = new Web3Storage({ token: process.env.WEB3_STORAGE_API_KEY! })
+      if(paymaster && paymaster.image){
+        try{
+            const imageFileResponse = await client.get(paymaster.image as string)
+            if(imageFileResponse){
+                const files = await imageFileResponse.files();
+                const imageFile = await files[0];
+                const imageURL = `https://${imageFile.cid}.ipfs.w3s.link`
+                paymaster.image = imageURL
+            }
+        }
+        catch(e){
+            console.log('caught error')
+            console.error(e)
+            paymaster.image = undefined
+        }
+        
+    }
     return paymaster
 }
 

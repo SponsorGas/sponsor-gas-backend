@@ -6,5 +6,8 @@ import sponsorGasController = require("../controllers/sponsor_gas.controllers")
  */
 export const sponsorGasRouter = express.Router()
 sponsorGasRouter.get("/application-name", sponsorGasController.applicationName)
+
+sponsorGasRouter.get("/paymasters/:id" , sponsorGasController.handlePaymasterById)
+
 sponsorGasRouter.get("/chains/:chainId/applications/:application_contract_address/paymasters" , sponsorGasController.getPaymastersForApplicationAddressAndChainId)
 
