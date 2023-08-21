@@ -209,13 +209,14 @@ const getAccessToken = (req: Request, res: Response) => {
   async function verifyNFTOwnership(req:express.Request, res: express.Response){
     const {paymasterId,scope,redirect_url} = req.query
     const {chainId,paymaster_address} = req.params
-    console.log(req.body.userOperation.sender)
+    const sender = req.body.userOperation.sender;
     const paymaster = await getPaymasterForId(paymasterId as string)
     if(paymaster){
       const paymasterCriteria = paymaster.PaymasterCriteria?.find(pc => pc.type === 'nft_challenge' ) 
       if (paymasterCriteria){
         const contractAddress = paymasterCriteria.nftCollection
-        const result = await doesUserHoldNFT(req.body.userOperation.sender,contractAddress!,chainId)
+        const result = await doesUserHoldNFT(sender,contractAddress!,chainId)
+
         console.log(result)
         if(result){
           const authorizationCode = generateAuthorizationCode();
@@ -259,12 +260,15 @@ const getAccessToken = (req: Request, res: Response) => {
               detail: verifyRes.data.detail,
             });
           }
+        }).catch(e => {
+          console.log(e);
+          console.log('Error Occured');  
+          return res.status(500)
         });
-    }catch(e){
+
+      }catch(e){
       res.status(500)
-      console.log(e)
     }
-    
   }
   
 

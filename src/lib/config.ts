@@ -34,8 +34,8 @@ export const config: Config = {
       }],
     symbol: 'BaseETH',
     pimlicoChainValue:'base-goerli',
-    blockExplorer: 'https://goerli.basescan.org',
-    rpcUrl: 'https://goerli.base.org',
+    blockExplorer: 'https://goerli.lineascan.build/',
+    rpcUrl: 'https://rpc.goerli.linea.build',
   },
   '0x14a33': {
     name: 'Goerli Base',
