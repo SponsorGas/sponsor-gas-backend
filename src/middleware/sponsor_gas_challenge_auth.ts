@@ -26,7 +26,7 @@ export function generateAndAttachChallengeToken(req: Request, res: Response, nex
      const token = jwt.sign({paymasterId, scope,redirect_url }, secretKey, { expiresIn: '15m' });
 
      // Set the JWT as a cookie
-     res.cookie('ChallengeRequestToken', token, { httpOnly: true });
+     res.cookie('ChallengeRequestToken', token, { httpOnly: true,secure:true });
      console.log("added cookies")
      // Attach the token to the response object so that it can be sent in the JSON response
      //res.locals.token = token;
