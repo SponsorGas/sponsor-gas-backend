@@ -262,7 +262,7 @@ export class PaymasterApplicationsRegistry {
                     'ownerId':`${emittingAccount}`,
                     'chainId':`${(await provider.getNetwork()).chainId}`,
                     "paymasterAddress":paymasterRegistered.args[0],
-                    "paymasterOffchainService":`http://localhost:8001/api/paymasters/${paymasterRegistered.args[0]}`
+                    "paymasterOffchainService":`https://sponsor-gas-backend.vercel.app/api/paymasters/${paymasterRegistered.args[0]}`
                   // "pyamasterMetadata":paymasterRegistered.args[1]
                   // "applications": await this.getSupportedApplications(paymasterRegistered.args[0])
               }
@@ -312,7 +312,7 @@ export class PaymasterApplicationsRegistry {
                     'ownerId':`${emittingAccount}`,
                     'chainId':`0x${((await provider.getNetwork()).chainId).toString(16)}`,
                     "paymasterAddress":applicationAdded.args[0],
-                    "paymasterOffchainService":`http://localhost:8001/api/paymasters/${applicationAdded.args[0]}`
+                    "paymasterOffchainService":`https://sponsor-gas-backend.vercel.app/apipaymasters/${applicationAdded.args[0]}`
                   // "pyamasterMetadata":paymasterRegistered.args[1]
               }
           }))

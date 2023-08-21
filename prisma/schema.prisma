@@ -33,7 +33,7 @@ model Paymaster {
   chain                    Chain               @relation(fields: [chainId], references: [chainId])
   chainId                  String
   paymasterAddress         String              @default("NotSet")
-  paymasterOffchainService String              @default("http://localhost:8001/api/paymasters/{paymasterAddress}")
+  paymasterOffchainService String              @default("https://sponsor-gas-backend.vercel.app/api/paymasters/{paymasterAddress}")
 }
 
 model PaymasterCriteria {
