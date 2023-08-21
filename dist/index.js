@@ -12,7 +12,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 // Use the cors middleware to allow requests from any origin
 app.use(cors({
-    origin: 'http://localhost:3001',
+    origin: 'https://sample-application-kannusingh.vercel.app/',
     credentials: true, // Allow credentials (cookies) to be sent in cross-origin requests
 }));
 app.use(express.static(path.join(__dirname, 'public')));

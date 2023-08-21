@@ -14,7 +14,7 @@ const port = process.env.PORT || 3000;
 
 // Use the cors middleware to allow requests from any origin
 app.use(cors({
-  origin: 'http://localhost:3001', // Replace with your frontend URL
+  origin: 'https://sample-application-kannusingh.vercel.app/', // Replace with your frontend URL
   credentials: true, // Allow credentials (cookies) to be sent in cross-origin requests
 }));
 
