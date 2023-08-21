@@ -2,7 +2,7 @@
   "name": "sponsor-gas-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.ts",
+  "main": "dist/index.js",
   "scripts": {
     "build": "npx tsc && npx webpack --mode production && cp -R public dist",
     "prebuild": "rm -rf dist",
