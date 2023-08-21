@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "build": "npx tsc && npx webpack --mode production && cp -R public dist",
+    "build": "npx tsc && npx webpack --mode production && cp -R public dist && prisma generate",
     "prebuild": "rm -rf dist",
     "start": "node dist/index.js",
     "dev": "concurrently \"npx tsc --watch && npx webpack --mode production && cp -R public dist \" \"nodemon -q dist/index.js\""
