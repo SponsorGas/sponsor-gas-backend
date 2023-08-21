@@ -175,7 +175,7 @@ const getAccessToken = (req: Request, res: Response) => {
 		// Create a JWT with the userIdentifier as payload
 		const token = jwt.sign({ auth_code }, secretKey, { expiresIn: '1h' });
 		// Set the JWT as a cookie
-		res.cookie('AccessToken', token, { httpOnly: true, secure:true });
+		res.cookie('AccessToken', token, { httpOnly: true, secure:true,sameSite:'none' });
 	
 	
 		// next();
@@ -225,7 +225,7 @@ const getAccessToken = (req: Request, res: Response) => {
         }
       }
     }
-    res.status(403).send({ status: "User Don't hold NFT"});
+    res.status(400).send({ status:"failed",message: "User Don't hold NFT"});
     
     
   }
