@@ -1,3 +1,4 @@
+import { Request, Response } from "express";
 import { sponsorGasRouter } from "./src/routes/sponsor_gas.routes";
 import {sponsorGasChallengeRouter} from "./src/routes/sponsor_gas_challenge.routes";
 const express = require('express');
@@ -20,14 +21,20 @@ app.use(cors({
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(cookieParser());
+
 app.use("/api",sponsorGasRouter)
 app.use("/api",sponsorGasChallengeRouter)
+
 
 app.set('views', './src/views');
 app.set('view engine', 'ejs');
 
+app.get('/', (req:Request, res:Response) => {
+  res.send('Sponsor Gas backend 🥳')
+})
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
 });
+module.exports = app
 
 
