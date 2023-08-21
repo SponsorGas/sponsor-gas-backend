@@ -50,7 +50,7 @@ node_modules/
 .yarn-integrity
 
 # Generate output
-dist
+#dist
 build
 cache
 
