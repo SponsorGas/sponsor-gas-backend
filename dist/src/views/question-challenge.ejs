@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Question Challenge</title>
+  <style>
+    /* Add your custom CSS styles here */
+  </style>
+</head>
+<body>
+  <h1>Question Challenge</h1>
+  <p><%= challenge.question %></p>
+  <ul>
+    <% challenge.options.forEach(function(option) { %>
+      <li>
+        <label>
+          <input type="radio" name="answer" value="<%= option %>">
+          <%= option %>
+        </label>
+      </li>
+    <% }); %>
+  </ul>
+  <button onclick="submitChallenge()">Submit Challenge</button>
+
+  <script>
+    async function submitChallenge() {
+      // Perform any necessary logic for challenge submission
+      var selectedAnswer = document.querySelector('input[name="answer"]:checked');
+      var answer = selectedAnswer ? selectedAnswer.value : '';
+
+      const url = new URL(window.location.href);
+      url.search = '';
+
+      // Construct the challenge submission URL
+      const submissionUrl = `${url.toString()}/submit`;
+      // Call the API to submit the challenge response
+      try {
+        const response = await fetch(`${submissionUrl}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ answer }),
+        });
+
+        console.log(response)
+        // Check if the API call was successful
+        if (response.ok) {
+          // Get the JSON data from the response
+          const data = await response.json();
+
+          // Send the response back to the UI using window.postMessage()
+          window.opener.postMessage({ target:'sponsor-gas', data: data }, '*');
+          window.close();
+        } else {
+          // Handle the case when the API call fails
+          console.error('Challenge submission failed.');
+          // You can show an error message to the user or handle the error in any other way
+        }
+      } catch (error) {
+        // Handle any other errors that may occur during the API call
+        console.error('An error occurred:', error);
+      }
+    }
+  </script>
+</body>
+</html>

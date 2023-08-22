@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Video Challenge</title>
+  <style>
+    /* Add your custom CSS styles here */
+    #videoPlayer {
+      width: 400px;
+    }
+
+    /* Hide the button initially */
+    #submitButton {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Video Challenge</h1>
+  <video id="videoPlayer" controls controlslist="nofullscreen nodownload noremoteplayback noplaybackrate">
+    <source src="<%= videoURL %>" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+  <button id="submitButton" onclick="submitChallenge()">Submit Challenge</button>
+
+  <script>
+    const videoPlayer = document.getElementById('videoPlayer');
+    const submitButton = document.getElementById('submitButton');
+
+    // var video = document.getElementById('video');
+    var supposedCurrentTime = 0;
+
+    videoPlayer.addEventListener('timeupdate', function() {
+      if (!videoPlayer.seeking) {
+        supposedCurrentTime = videoPlayer.currentTime;
+      }
+    });
+
+    // prevent user from seeking
+    videoPlayer.addEventListener('seeking', function() {
+      var delta = videoPlayer.currentTime - supposedCurrentTime;
+      if (Math.abs(delta) > 0.01) {
+        console.log("Seeking is disabled");
+        videoPlayer.currentTime = supposedCurrentTime;
+      }
+    });
+
+    videoPlayer.addEventListener('ended', function() {
+      // Reset state in order to allow for rewind
+      supposedCurrentTime = 0;
+      // Show the submit button
+      submitButton.style.display = 'block';
+    });
+
+    async function submitChallenge() {
+      const url = new URL(window.location.href);
+      url.search = '';
+
+      // Construct the challenge submission URL
+      const submissionUrl = `${url.toString()}/submit`;
+      // Call the API to submit the challenge response
+      try {
+        const response = await fetch(`${submissionUrl}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        console.log(response)
+        // Check if the API call was successful
+        if (response.ok) {
+          // Get the JSON data from the response
+          const data = await response.json();
+
+          // Send the response back to the UI using window.postMessage()
+          window.opener.postMessage({ target:'sponsor-gas', data: data }, '*');
+          window.close();
+        } else {
+          // Handle the case when the API call fails
+          console.error('Challenge submission failed.');
+          // You can show an error message to the user or handle the error in any other way
+        }
+      } catch (error) {
+        // Handle any other errors that may occur during the API call
+        console.error('An error occurred:', error);
+      }
+    }
+  </script>
+</body>
+</html>
