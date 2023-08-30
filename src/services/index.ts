@@ -92,6 +92,15 @@ export const getPaymasterForId = async (paymasterId:string) =>{
     return paymaster
 }
 
+export const getPaymasterCriteriasForPaymasterId = async (paymasterId: string) => {
+    const paymasterCriterias = await prisma.paymasterCriteria.findMany({
+        where: {
+            paymasterId: paymasterId,
+        },
+    });
+    return paymasterCriterias;
+};
+
 export const getPaymasterCriteriaForPaymasterId = async (paymasterId: string): Promise<{ type: string, value: any }[]> => {
     const paymasterCriteria = await prisma.paymasterCriteria.findMany({
         where: {

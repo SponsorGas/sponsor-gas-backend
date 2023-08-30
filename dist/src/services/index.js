@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.doesUserHoldNFT = exports.getPaymasterCriteriaById = exports.getPaymasterCriteriaForPaymasterId = exports.getPaymasterForId = exports.getPaymaster = exports.getPaymastersOnChainForApplication = void 0;
+exports.doesUserHoldNFT = exports.getPaymasterCriteriaById = exports.getPaymasterCriteriaForPaymasterId = exports.getPaymasterCriteriasForPaymasterId = exports.getPaymasterForId = exports.getPaymaster = exports.getPaymastersOnChainForApplication = void 0;
 const prisma_1 = __importDefault(require("../lib/prisma"));
 const ethers_1 = require("ethers");
 const config_1 = require("../lib/config");
@@ -90,6 +90,15 @@ const getPaymasterForId = async (paymasterId) => {
     return paymaster;
 };
 exports.getPaymasterForId = getPaymasterForId;
+const getPaymasterCriteriasForPaymasterId = async (paymasterId) => {
+    const paymasterCriterias = await prisma_1.default.paymasterCriteria.findMany({
+        where: {
+            paymasterId: paymasterId,
+        },
+    });
+    return paymasterCriterias;
+};
+exports.getPaymasterCriteriasForPaymasterId = getPaymasterCriteriasForPaymasterId;
 const getPaymasterCriteriaForPaymasterId = async (paymasterId) => {
     const paymasterCriteria = await prisma_1.default.paymasterCriteria.findMany({
         where: {

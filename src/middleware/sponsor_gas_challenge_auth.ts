@@ -6,6 +6,45 @@ const crypto = require('crypto');
 const secretKey = 'your_secret_key';
 
 const authorizedTokens = new Set();
+
+export function attachChallengeToken(req: Request, res: Response, next: () => void) {
+  const {paymasterId} = req.query
+  console.log(paymasterId)
+  if(!paymasterId){
+      return res.status(400).json(
+          {
+              error:"Invalid Request: Include paymasterId"
+          }
+      );
+  }
+
+   // Create a JWT with the userIdentifier as payload
+   const token = jwt.sign({paymasterId }, secretKey, { expiresIn: '15m' });
+
+   // Set the JWT as a cookie
+   res.cookie('ChallengeRequestToken', token, { httpOnly: true, maxAge:15*60*1000});
+   console.log("attachChallengeToken:added cookies")
+
+   next();
+} 
+
+// Middleware to verify the JWT token from cookies (client-side)
+export function verifyNewChallengeToken(req: Request, res: Response, next: () => void) {
+  console.log('verifyNewChallengeToken')
+  const token = req.cookies.ChallengeRequestToken;
+  console.log(token)
+  if (!token) {
+    return res.status(401).send('Unauthorized: No token provided.');
+  }
+
+  jwt.verify(token, secretKey, (err: any, decoded: { paymasterId:string }) => {
+    if (err) {
+      return res.status(401).send('Unauthorized: Invalid token.');
+    }
+    next();
+  });
+}
+
 export function generateAndAttachChallengeToken(req: Request, res: Response, next: () => void) {
     
 

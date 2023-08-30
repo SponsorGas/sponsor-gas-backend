@@ -10,9 +10,10 @@ const cookieParser = require('cookie-parser');
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
+console.log(`Frontend URL: ${process.env.SAMPLE_APPLICATION_URL}`);
 // Use the cors middleware to allow requests from any origin
 app.use(cors({
-    origin: 'https://sample-application-kannusingh.vercel.app',
+    origin: process.env.SAMPLE_APPLICATION_URL,
     credentials: true, // Allow credentials (cookies) to be sent in cross-origin requests
 }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -20,8 +21,6 @@ app.use(express.json());
 app.use(cookieParser());
 app.use("/api", sponsor_gas_routes_1.sponsorGasRouter);
 app.use("/api", sponsor_gas_challenge_routes_1.sponsorGasChallengeRouter);
-app.set('views', './src/views');
-app.set('view engine', 'ejs');
 app.get('/', (req, res) => {
     res.send('Sponsor Gas backend 🥳');
 });

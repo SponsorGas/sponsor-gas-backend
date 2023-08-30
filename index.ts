@@ -12,9 +12,10 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
+console.log(`Frontend URL: ${process.env.SAMPLE_APPLICATION_URL}`)
 // Use the cors middleware to allow requests from any origin
 app.use(cors({
-  origin: 'https://sample-application-kannusingh.vercel.app', // Replace with your frontend URL
+  origin: process.env.SAMPLE_APPLICATION_URL, // Replace with your frontend URL
   credentials: true, // Allow credentials (cookies) to be sent in cross-origin requests
 }));
 
@@ -24,10 +25,6 @@ app.use(cookieParser());
 
 app.use("/api",sponsorGasRouter)
 app.use("/api",sponsorGasChallengeRouter)
-
-
-app.set('views', './src/views');
-app.set('view engine', 'ejs');
 
 app.get('/', (req:Request, res:Response) => {
   res.send('Sponsor Gas backend 🥳')

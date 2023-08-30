@@ -6,145 +6,15 @@ const UserOp_1 = require("../utils/UserOp");
 const services_1 = require("../services");
 const web3_storage_1 = require("web3.storage");
 const axios_1 = __importDefault(require("axios"));
+const idkit_1 = require("@worldcoin/idkit");
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const secretKey = process.env.JWT_SECRET;
 const authorizedTokens = new Set();
-const getRandomValue = (arr) => arr[Math.floor(Math.random() * arr.length)];
-const paymasterWithScope = async (_req, _res) => {
-    try {
-        const { paymasterId, scope, redirectUrl } = _req.query;
-        const { paymaster_address } = _req.params;
-        const paymasterIdString = paymasterId?.toString() || '';
-        const paymasterCriteria = await (0, services_1.getPaymasterCriteriaForPaymasterId)(paymasterIdString);
-        const randomCriteria = getRandomValue(paymasterCriteria);
-        let redirectPath = '';
-        if (randomCriteria.type === 'video_challenge') {
-            redirectPath = '/api/paymasters/' + paymaster_address + '/challenges/video';
-        }
-        else if (randomCriteria.type === 'question_challenge') {
-            redirectPath = '/api/paymasters/' + paymaster_address + '/challenges/question';
-        }
-        else if (randomCriteria.type === 'identity_challenge') {
-            redirectPath = '/api/paymasters/' + paymaster_address + '/challenges/identity';
-        }
-        else if (randomCriteria.type === 'nft_challenge') {
-            redirectPath = '/api/paymasters/' + paymaster_address + '/challenges/nft';
-        }
-        else {
-            _res.status(404).end();
-            return;
-        }
-        // Append the criteria value as a query parameter in the redirect URL
-        redirectPath += '?criteria=' + encodeURIComponent(randomCriteria.value);
-        _res.redirect(redirectPath);
-    }
-    catch (error) {
-        console.error(error);
-        _res.status(500).end();
-    }
-};
-const videoChallenge = async (_req, _res) => {
-    try {
-        const { criteria } = _req.query;
-        if (!criteria) {
-            throw new Error('Criteria not provided');
-        }
-        // criteria is a CID , to fetch video file
-        const client = new web3_storage_1.Web3Storage({ token: process.env.WEB3_STORAGE_API_KEY });
-        const videoFileResponse = await client.get(criteria);
-        if (videoFileResponse) {
-            const files = await videoFileResponse.files();
-            console.log(files);
-            const videoFile = await files[0];
-            const videoURL = `https://${videoFile.cid}.ipfs.w3s.link`;
-            _res.render('video-challenge', { videoURL });
-        }
-        // Render the video challenge template and send it to the UI
-        // _res.render('video-challenge');
-    }
-    catch (error) {
-        console.error(error);
-        _res.status(500).end();
-    }
-};
-const questionChallenge = async (_req, _res) => {
-    try {
-        const { criteria } = _req.query;
-        if (!criteria) {
-            throw new Error('Criteria not provided');
-        }
-        // criteria is a paymasterCriteriaId
-        const paymasterCriteria = await (0, services_1.getPaymasterCriteriaById)(criteria);
-        if (paymasterCriteria.type !== 'question_challenge' || !paymasterCriteria.questionBook) {
-            _res.status(400).end('Invalid or missing question challenge criteria');
-            return;
-        }
-        const questionBook = JSON.parse(paymasterCriteria.questionBook);
-        // Assuming paymasterCriteria.questionBook contains the JSON for question challenge
-        const challenge = {
-            type: 'question',
-            question: questionBook.question,
-            options: questionBook.options,
-        };
-        _res.render('question-challenge', { challenge });
-    }
-    catch (error) {
-        console.error(error);
-        _res.status(500).end();
-    }
-};
-const identityChallenge = async (_req, _res) => {
-    try {
-        const { criteria } = _req.query;
-        if (!criteria) {
-            throw new Error('Criteria not provided');
-        }
-        // criteria is a identity type
-        if (criteria === 'worldcoin') {
-            _res.render('worldcoin-challenge');
-        }
-    }
-    catch (error) {
-        console.error(error);
-        _res.status(500).end();
-    }
-};
-const paymasterChallenge = (_req, _res) => {
-    try {
-        const challenge = {
-            type: 'question',
-            question: 'What is the capital of France?',
-            options: ['London', 'Paris', 'Berlin', 'Madrid'],
-        };
-        //res.json({ challenge, token: res.locals.token });
-        _res.render('question-challenge', { challenge });
-        // _res.setHeader("Content-Type", "application/json")
-        // _res.status(200).end(JSON.stringify({ app_name: "SPONSOR GAS BACKEND" }))
-    }
-    catch (error) {
-        console.error(error);
-        _res.status(500).end();
-    }
-};
-const submitPaymasterChallenge = (req, res) => {
-    // Extract the challenge response from the request body (assuming it's sent as JSON)
-    // const {answer} = req.body
-    // console.log(answer)
-    // const { scope,redirect_url } = req;
-    const authorizationCode = generateAuthorizationCode();
-    authorizedTokens.add(authorizationCode);
-    //  authorizedTokens.add({'AuthCode':authorizationCode,'expire_in':Date.now()+(60*1000)}); //1 min
-    // Here, you can process the challenge response as needed, e.g., validate the answer, store it in the database, etc.
-    // For simplicity, we'll just send a response indicating success.
-    // res.redirect(`${redirect_url}/?code=${authorizationCode}`);
-    res.send({ message: 'Challenge response submitted successfully!', AuthCode: authorizationCode });
-};
 const getAccessToken = (req, res) => {
     generateAndAttachAccessToken(req, res);
     res.status(200).send();
 };
-//some middleware method as currently storing the authorization code on a 'set'
 function generateAuthorizationCode() {
     // Generate a 32-byte random buffer (adjust the length as needed)
     const buffer = crypto.randomBytes(32);
@@ -171,85 +41,162 @@ const getPaymasterAndData = async (req, res) => {
         const signedUserOpWithPaymasterData = await (0, UserOp_1.getSignedUserOpWithPaymasterData)(_userOperation, chainId, entryPoint);
         console.log(signedUserOpWithPaymasterData);
         if (signedUserOpWithPaymasterData) {
-            // Render the video challenge template and send it to the UI
             return res.status(200).send({ "userOperation": signedUserOpWithPaymasterData });
         }
     }
     catch (err) {
         return res.status(400).send({ 'error': 'Some error occurred' });
     }
-    // Render the video challenge template and send it to the UI
     res.status(400).send({ 'error': 'Some error occurred' });
 };
-async function verifyNFTOwnership(req, res) {
-    const { paymasterId, scope, redirect_url } = req.query;
-    const { chainId, paymaster_address } = req.params;
-    const sender = req.body.userOperation.sender;
-    const paymaster = await (0, services_1.getPaymasterForId)(paymasterId);
-    if (paymaster) {
-        const paymasterCriteria = paymaster.PaymasterCriteria?.find(pc => pc.type === 'nft_challenge');
-        if (paymasterCriteria) {
-            const contractAddress = paymasterCriteria.nftCollection;
-            const result = await (0, services_1.doesUserHoldNFT)(sender, contractAddress, chainId);
-            console.log(result);
-            if (result) {
+const getChallengeData = async (req, res) => {
+    try {
+        const { paymasterId } = req.query;
+        const paymasterIdString = paymasterId?.toString() || '';
+        const paymasterCriterias = await (0, services_1.getPaymasterCriteriasForPaymasterId)(paymasterIdString);
+        if (!paymasterCriterias) {
+            return res.status(404).end(); // No criteria found
+        }
+        const challengeType = paymasterCriterias[0].type;
+        let data = {};
+        switch (challengeType) {
+            case 'video_challenge':
+                const client = new web3_storage_1.Web3Storage({ token: process.env.WEB3_STORAGE_API_KEY });
+                const videoFileResponse = await client.get(paymasterCriterias[0].video);
+                if (videoFileResponse) {
+                    const files = await videoFileResponse.files();
+                    const videoFile = files[0];
+                    data = {
+                        videoUrl: `https://${videoFile.cid}.ipfs.w3s.link`
+                    };
+                }
+                break;
+            case 'question_challenge':
+                const questionBook = JSON.parse(paymasterCriterias[0].questionBook?.toString());
+                data = {
+                    question: questionBook.question,
+                    options: questionBook.options
+                };
+                break;
+            case 'identity_challenge':
+                if (paymasterCriterias[0].identityProvider === 'worldcoin') {
+                    const worldcoinData = {
+                        'identity_provider': 'worldcoin',
+                        'app_id': 'app_staging_05593ec5ccbc03aede3ee2a86e3686d6',
+                        'action': "identityproof",
+                        'credential_types': [idkit_1.CredentialType.Phone],
+                    };
+                    data = worldcoinData;
+                }
+                break;
+            case 'nft_challenge':
+                data = { nftCollection: paymasterCriterias[0].nftCollection ?? '' };
+                break;
+            default:
+                return res.status(404).end("Invalid challenge type"); // Invalid challenge type
+        }
+        console.log(data);
+        return res.status(200).send({ data: JSON.stringify(data) });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).end();
+    }
+};
+const submitPaymasterChallenge = async (req, res) => {
+    try {
+        const { paymasterId } = req.query;
+        const data = req.body && req.body.data;
+        const paymasterIdString = paymasterId?.toString() || '';
+        const paymasterCriterias = await (0, services_1.getPaymasterCriteriasForPaymasterId)(paymasterIdString);
+        const paymaster = await (0, services_1.getPaymasterForId)(paymasterIdString);
+        if (paymasterId == null || paymasterId === undefined) {
+            return res.status(404).end('Invalid paymasterId');
+        }
+        if (!paymasterCriterias || paymasterCriterias.length === 0) {
+            return res.status(404).end('No criteria found');
+        }
+        const challengeType = paymasterCriterias[0].type;
+        switch (challengeType) {
+            case 'video_challenge': {
                 const authorizationCode = generateAuthorizationCode();
                 authorizedTokens.add(authorizationCode);
                 return res.status(200).send({ status: "success", AuthCode: authorizationCode });
             }
+            case 'question_challenge': {
+                const questionBook = JSON.parse(paymasterCriterias[0].questionBook?.toString());
+                if (questionBook.options.includes(data.answer) && questionBook.answer === data.answer) {
+                    const authorizationCode = generateAuthorizationCode();
+                    authorizedTokens.add(authorizationCode);
+                    return res.status(200).send({ status: "success", AuthCode: authorizationCode });
+                }
+                else {
+                    return res.status(400).send({ status: "failed", message: "Incorrect answer" });
+                }
+            }
+            case 'identity_challenge': {
+                if (paymasterCriterias[0].identityProvider === 'worldcoin' && data.identity_provider === 'worldcoin') {
+                    const verifyRes = await verifyWorldcoinIdentity(data.worldcoin_data);
+                    console.log(verifyRes);
+                    if (verifyRes.status === 200) {
+                        const authorizationCode = generateAuthorizationCode();
+                        authorizedTokens.add(authorizationCode);
+                        return res.status(verifyRes.status).send({ code: "success", AuthCode: authorizationCode });
+                    }
+                    else {
+                        return res.status(verifyRes.status).send({
+                            code: verifyRes.data.code,
+                            detail: verifyRes.data.detail,
+                        });
+                    }
+                }
+                break;
+            }
+            case 'nft_challenge': {
+                if (paymaster && data.userOperation?.sender) {
+                    const sender = data.userOperation.sender;
+                    const chainId = paymaster.chainId;
+                    const contractAddress = paymasterCriterias[0].nftCollection;
+                    const result = await (0, services_1.doesUserHoldNFT)(sender, contractAddress, chainId);
+                    console.log(result);
+                    if (result) {
+                        const authorizationCode = generateAuthorizationCode();
+                        authorizedTokens.add(authorizationCode);
+                        return res.status(200).send({ status: "success", AuthCode: authorizationCode });
+                    }
+                    else {
+                        return res.status(400).send({ status: "failed", message: "User Don't hold NFT" });
+                    }
+                }
+                break;
+            }
+            default:
+                return res.status(404).end("Invalid Challenge Type");
         }
     }
-    res.status(400).send({ status: "failed", message: "User Don't hold NFT" });
-}
-function verifyWorldcoinIdentity(req, res) {
-    try {
-        const reqBody = {
-            merkle_root: req.body.data.merkle_root,
-            nullifier_hash: req.body.data.nullifier_hash,
-            proof: req.body.data.proof,
-            credential_type: req.body.data.credential_type,
-            action: 'identityproof',
-            signal: req.body.signal ?? "", // if we don't have a signal, use the empty string
-        };
-        axios_1.default.post(`https://developer.worldcoin.org/api/v1/verify/${process.env.WLD_APP_ID}`, reqBody, {
-            headers: {
-                "Content-Type": "application/json",
-            }
-        }).then((verifyRes) => {
-            console.log(verifyRes);
-            if (verifyRes.status == 200) {
-                // this is where you should perform backend actions based on the verified credential
-                // i.e. setting a user as "verified" in a database
-                const authorizationCode = generateAuthorizationCode();
-                authorizedTokens.add(authorizationCode);
-                res.status(verifyRes.status).send({ code: "success", AuthCode: authorizationCode });
-            }
-            else {
-                // return the error code and detail from the World ID /verify endpoint to our frontend
-                res.status(verifyRes.status).send({
-                    code: verifyRes.data.code,
-                    detail: verifyRes.data.detail,
-                });
-            }
-        }).catch(e => {
-            console.log(e);
-            console.log('Error Occured');
-            return res.status(500);
-        });
+    catch (error) {
+        console.error(error);
+        res.status(500).end();
     }
-    catch (e) {
-        res.status(500);
-    }
+};
+function verifyWorldcoinIdentity(worldcoinData) {
+    const reqBody = {
+        merkle_root: worldcoinData.merkle_root,
+        nullifier_hash: worldcoinData.nullifier_hash,
+        proof: worldcoinData.proof,
+        credential_type: worldcoinData.credential_type,
+        action: 'identityproof',
+        signal: worldcoinData.signal ?? "", // if we don't have a signal, use the empty string
+    };
+    return axios_1.default.post(`https://developer.worldcoin.org/api/v1/verify/${process.env.WLD_APP_ID}`, reqBody, {
+        headers: {
+            "Content-Type": "application/json",
+        }
+    });
 }
 module.exports = {
-    paymasterChallenge,
-    paymasterWithScope,
     submitPaymasterChallenge,
     getAccessToken,
     getPaymasterAndData,
-    videoChallenge,
-    questionChallenge,
-    identityChallenge,
-    verifyWorldcoinIdentity,
-    verifyNFTOwnership
+    getChallengeData
 };
