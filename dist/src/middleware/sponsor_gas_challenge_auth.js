@@ -17,7 +17,7 @@ function attachChallengeToken(req, res, next) {
     // Create a JWT with the userIdentifier as payload
     const token = jwt.sign({ paymasterId }, secretKey, { expiresIn: '15m' });
     // Set the JWT as a cookie
-    res.cookie('ChallengeRequestToken', token, { httpOnly: true, maxAge: 15 * 60 * 1000 });
+    res.cookie('ChallengeRequestToken', token, { httpOnly: true, secure: true, sameSite: 'none', maxAge: 15 * 60 * 1000 });
     console.log("attachChallengeToken:added cookies");
     next();
 }
