@@ -1,6 +1,6 @@
 import express from "express"
 import sponsorGasChallengeController = require("../controllers/sponsor_gas_challenge.controllers")
-import { attachChallengeToken, generateAndAttachChallengeToken, verifyAccessToken, verifyChallengeToken, verifyNewChallengeToken } from "../middleware/sponsor_gas_challenge_auth"
+import { attachChallengeToken, verifyAccessToken,  verifyNewChallengeToken } from "../middleware/sponsor_gas_challenge_auth"
 
 /**
  * Router Definition

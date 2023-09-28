@@ -32,7 +32,7 @@ function generateAndAttachAccessToken(req: Request, res: Response) {
   // Create a JWT with the userIdentifier as payload
   const token = jwt.sign({ auth_code }, secretKey, { expiresIn: '1h' });
   // Set the JWT as a cookie
-  res.cookie('AccessToken', token, { httpOnly: true, secure:true,sameSite:'none' });
+  res.cookie('AccessToken', token, { domain: process.env.SAMPLE_APPLICATION_DOMAIN, httpOnly: true, secure:true,sameSite:'none' });
 
 
   // next();
