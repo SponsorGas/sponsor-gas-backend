@@ -1,6 +1,5 @@
-import { PaymasterApplicationsRegistry } from "../utils/paymaster_applications_registry/PaymasterApplicationsRegistry";
 import prisma from "../lib/prisma";
-import {  Paymaster, PaymasterCriteria } from "../model/SponsorGas";
+import {  Paymaster } from "../model/SponsorGas";
 import { ethers } from "ethers";
 import { getChainConfigForChainId } from "../lib/config";
 import { Web3Storage } from "web3.storage";

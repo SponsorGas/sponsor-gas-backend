@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getChainConfigForChainId = exports.getPimlicoChainNameByChainId = exports.getPaymasterRegistryContractAddressByChainId = exports.getEntryPointContractAddressByChainId = exports.getVerifyingPaymasterContractAddressByChainId = exports.isSupportedNetwork = exports.config = void 0;
+exports.getBlockExplorerURLByChainId = exports.getChainConfigForChainId = exports.getPimlicoChainNameByChainId = exports.getPaymasterRegistryContractAddressByChainId = exports.getEntryPointContractAddressByChainId = exports.getVerifyingPaymasterContractAddressByChainId = exports.isSupportedNetwork = exports.config = void 0;
 const dotenv = require('dotenv');
 dotenv.config();
 exports.config = {
@@ -15,8 +15,8 @@ exports.config = {
                 name: 'ETHGlobal Staking'
             }
         ],
-        symbol: 'BaseETH',
-        pimlicoChainValue: 'base-goerli',
+        symbol: 'LineaETH',
+        pimlicoChainValue: 'linea-testnet',
         blockExplorer: 'https://goerli.lineascan.build/',
         rpcUrl: 'https://rpc.goerli.linea.build',
     },
@@ -109,3 +109,10 @@ const getChainConfigForChainId = (chainId) => {
     }
 };
 exports.getChainConfigForChainId = getChainConfigForChainId;
+const getBlockExplorerURLByChainId = (chainId) => {
+    const chainConfig = exports.config[chainId];
+    if (chainConfig && (0, exports.isSupportedNetwork)(chainId)) {
+        return chainConfig.blockExplorer;
+    }
+};
+exports.getBlockExplorerURLByChainId = getBlockExplorerURLByChainId;

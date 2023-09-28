@@ -32,8 +32,8 @@ export const config: Config = {
         applicationContractAddress:'0xea68b3efbbf63bb837f36a90aa97df27bbf9b864',
         name:'ETHGlobal Staking'
       }],
-    symbol: 'BaseETH',
-    pimlicoChainValue:'base-goerli',
+    symbol: 'LineaETH',
+    pimlicoChainValue:'linea-testnet',
     blockExplorer: 'https://goerli.lineascan.build/',
     rpcUrl: 'https://rpc.goerli.linea.build',
   },
@@ -114,5 +114,12 @@ export const getChainConfigForChainId = (chainId: string): ChainConfig | undefin
   const chainConfig = config[chainId];
   if (chainConfig && isSupportedNetwork(chainId)) {
     return chainConfig;
+  } 
+}
+
+export const getBlockExplorerURLByChainId = (chainId: string): string | undefined => {
+  const chainConfig = config[chainId];
+  if (chainConfig && isSupportedNetwork(chainId)) {
+    return chainConfig.blockExplorer;
   } 
 }

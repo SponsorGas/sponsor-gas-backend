@@ -25,6 +25,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC1967__factory>;
     getContractFactory(
+      name: "IERC4906",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC4906__factory>;
+    getContractFactory(
       name: "IBeacon",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IBeacon__factory>;
@@ -53,6 +57,22 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC1155Receiver__factory>;
     getContractFactory(
+      name: "ERC721",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC721__factory>;
+    getContractFactory(
+      name: "ERC721URIStorage",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC721URIStorage__factory>;
+    getContractFactory(
+      name: "IERC721Metadata",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC721Metadata__factory>;
+    getContractFactory(
+      name: "IERC721",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC721__factory>;
+    getContractFactory(
       name: "IERC721Receiver",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC721Receiver__factory>;
@@ -68,10 +88,6 @@ declare module "hardhat/types/runtime" {
       name: "IERC165",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC165__factory>;
-    getContractFactory(
-      name: "PaymasterApplicationsRegistry",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.PaymasterApplicationsRegistry__factory>;
     getContractFactory(
       name: "BaseAccount",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -133,6 +149,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IStakeManager__factory>;
     getContractFactory(
+      name: "IZkSessionAccountVerifier",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IZkSessionAccountVerifier__factory>;
+    getContractFactory(
       name: "TokenCallbackHandler",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TokenCallbackHandler__factory>;
@@ -145,9 +165,33 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SimpleAccountFactory__factory>;
     getContractFactory(
+      name: "SimpleZkSessionAccount",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SimpleZkSessionAccount__factory>;
+    getContractFactory(
+      name: "SimpleZkSessionAccountFactory",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SimpleZkSessionAccountFactory__factory>;
+    getContractFactory(
+      name: "SimpleZkSessionAccountVerifier",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SimpleZkSessionAccountVerifier__factory>;
+    getContractFactory(
       name: "VerifyingPaymaster",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.VerifyingPaymaster__factory>;
+    getContractFactory(
+      name: "NAVHHackerNFT",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.NAVHHackerNFT__factory>;
+    getContractFactory(
+      name: "StakingContract",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.StakingContract__factory>;
+    getContractFactory(
+      name: "XSuperhack",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.XSuperhack__factory>;
 
     getContractAt(
       name: "Ownable",
@@ -164,6 +208,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IERC1967>;
+    getContractAt(
+      name: "IERC4906",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC4906>;
     getContractAt(
       name: "IBeacon",
       address: string,
@@ -200,6 +249,26 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC1155Receiver>;
     getContractAt(
+      name: "ERC721",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC721>;
+    getContractAt(
+      name: "ERC721URIStorage",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC721URIStorage>;
+    getContractAt(
+      name: "IERC721Metadata",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC721Metadata>;
+    getContractAt(
+      name: "IERC721",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC721>;
+    getContractAt(
       name: "IERC721Receiver",
       address: string,
       signer?: ethers.Signer
@@ -219,11 +288,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IERC165>;
-    getContractAt(
-      name: "PaymasterApplicationsRegistry",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.PaymasterApplicationsRegistry>;
     getContractAt(
       name: "BaseAccount",
       address: string,
@@ -300,6 +364,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IStakeManager>;
     getContractAt(
+      name: "IZkSessionAccountVerifier",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IZkSessionAccountVerifier>;
+    getContractAt(
       name: "TokenCallbackHandler",
       address: string,
       signer?: ethers.Signer
@@ -315,10 +384,40 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.SimpleAccountFactory>;
     getContractAt(
+      name: "SimpleZkSessionAccount",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SimpleZkSessionAccount>;
+    getContractAt(
+      name: "SimpleZkSessionAccountFactory",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SimpleZkSessionAccountFactory>;
+    getContractAt(
+      name: "SimpleZkSessionAccountVerifier",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SimpleZkSessionAccountVerifier>;
+    getContractAt(
       name: "VerifyingPaymaster",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.VerifyingPaymaster>;
+    getContractAt(
+      name: "NAVHHackerNFT",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.NAVHHackerNFT>;
+    getContractAt(
+      name: "StakingContract",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.StakingContract>;
+    getContractAt(
+      name: "XSuperhack",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.XSuperhack>;
 
     // default types
     getContractFactory(
